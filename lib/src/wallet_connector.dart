@@ -25,23 +25,27 @@ class WalletConnector {
 
   /// Connector using brigde 'https://bridge.walletconnect.org' by default.
   factory WalletConnector(AppInfo? appInfo, {String? bridge}) {
-    final connector = WalletConnect(
-      bridge: bridge ?? 'https://bridge.walletconnect.org',
-      clientMeta: PeerMeta(
-        name: appInfo?.name ?? 'WalletConnect',
-        description: appInfo?.description ?? 'WalletConnect Developer App',
-        url: appInfo?.url ?? 'https://walletconnect.org',
-        icons: appInfo?.icons ??
-            [
-              'https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media'
-            ],
-      ),
-    );
+    try {
+      final connector = WalletConnect(
+        bridge: bridge ?? 'https://bridge.walletconnect.org',
+        clientMeta: PeerMeta(
+          name: appInfo?.name ?? 'WalletConnect',
+          description: appInfo?.description ?? 'WalletConnect Developer App',
+          url: appInfo?.url ?? 'https://walletconnect.org',
+          icons: appInfo?.icons ??
+              [
+                'https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media'
+              ],
+        ),
+      );
 
-    return WalletConnector._internal(
-      connector: connector,
-      appInfo: appInfo,
-    );
+      return WalletConnector._internal(
+        connector: connector,
+        appInfo: appInfo,
+      );
+    } catch (e) {
+      throw Exception("Wallet Exception");
+    }
   }
 
   /// Get public address, wallet param only use on iOS and using metamask by default
@@ -61,19 +65,21 @@ class WalletConnector {
           }
         },
       ).catchError((onError) {
-        throw onError;
+        throw Future.error(Exception("Platform Exception"));
+        ;
       });
       if (session.accounts.isNotEmpty) {
         var address = session.accounts.first;
         return address;
       } else {
-        throw 'Unexpected exception';
+        throw Future.error(Exception("Platform Exception"));
+        ;
       }
     } else {
       if (connector.session.accounts.isNotEmpty) {
         return connector.session.accounts.first;
       } else {
-        throw 'Unexpected exception';
+        throw Future.error(Exception("Platform Exception"));
       }
     }
   }
